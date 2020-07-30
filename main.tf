@@ -143,7 +143,7 @@ resource "aws_lb_target_group" "default" {
 resource "aws_lb_target_group" "wss" {
   count = var.wss_enabled ? 1 : 0
 
-  name                 = var.target_group_name == "" ? module.default_target_group_label.id : var.target_group_name
+  name                 = var.target_group_name == "" ? "${module.default_target_group_label.id}-wss" : "${var.target_group_name}-wss"
   port                 = var.target_group_port
   protocol             = "TLS"
   vpc_id               = var.vpc_id
