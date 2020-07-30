@@ -140,10 +140,21 @@ resource "aws_lb_target_group" "default" {
   )
 }
 
+module "wss_target_group_label" {
+  source      = "git::https://github.com/cloudposse/terraform-null-label.git?ref=tags/0.16.0"
+  attributes  = concat(var.attributes, ["wss"])
+  delimiter   = var.delimiter
+  name        = var.name
+  namespace   = var.namespace
+  stage       = var.stage
+  environment = var.environment
+  tags        = var.tags
+}
+
 resource "aws_lb_target_group" "wss" {
   count = var.wss_enabled ? 1 : 0
 
-  name                 = var.target_group_name == "" ? "${module.default_target_group_label.id}-wss" : "${var.target_group_name}-wss"
+  name                 = var.target_group_name == "" ? module.wss_target_group_label : "${var.target_group_name}-wss"
   port                 = var.target_group_port
   protocol             = "TLS"
   vpc_id               = var.vpc_id
