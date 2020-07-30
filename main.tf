@@ -47,17 +47,6 @@ resource "aws_security_group_rule" "https_ingress" {
   security_group_id = aws_security_group.default.id
 }
 
-resource "aws_security_group_rule" "wss_ingress" {
-  count             = var.wss_enabled ? 1 : 0
-  type              = "ingress"
-  from_port         = var.http_port
-  to_port           = var.http_port
-  protocol          = "tcp"
-  cidr_blocks       = var.http_ingress_cidr_blocks
-  prefix_list_ids   = var.http_ingress_prefix_list_ids
-  security_group_id = aws_security_group.default.id
-}
-
 module "access_logs" {
   source                             = "git::https://github.com/cloudposse/terraform-aws-lb-s3-bucket.git?ref=tags/0.4.0"
   enabled                            = var.access_logs_enabled
