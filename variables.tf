@@ -303,3 +303,9 @@ variable "stickiness" {
   description = "Target group sticky configuration"
   default     = null
 }
+
+variable "wss_enabled" {
+  type        = bool
+  description = "Enables WSS target group for ALB"
+  default     = false
+}

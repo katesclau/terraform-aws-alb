@@ -47,6 +47,17 @@ resource "aws_security_group_rule" "https_ingress" {
   security_group_id = aws_security_group.default.id
 }
 
+resource "aws_security_group_rule" "wss_ingress" {
+  count             = var.wss_enabled ? 1 : 0
+  type              = "ingress"
+  from_port         = var.http_port
+  to_port           = var.http_port
+  protocol          = "tls"
+  cidr_blocks       = var.http_ingress_cidr_blocks
+  prefix_list_ids   = var.http_ingress_prefix_list_ids
+  security_group_id = aws_security_group.default.id
+}
+
 module "access_logs" {
   source                             = "git::https://github.com/cloudposse/terraform-aws-lb-s3-bucket.git?ref=tags/0.4.0"
   enabled                            = var.access_logs_enabled
@@ -107,6 +118,45 @@ resource "aws_lb_target_group" "default" {
   name                 = var.target_group_name == "" ? module.default_target_group_label.id : var.target_group_name
   port                 = var.target_group_port
   protocol             = var.target_group_protocol
+  vpc_id               = var.vpc_id
+  target_type          = var.target_group_target_type
+  deregistration_delay = var.deregistration_delay
+
+  health_check {
+    protocol            = var.target_group_protocol
+    path                = var.health_check_path
+    timeout             = var.health_check_timeout
+    healthy_threshold   = var.health_check_healthy_threshold
+    unhealthy_threshold = var.health_check_unhealthy_threshold
+    interval            = var.health_check_interval
+    matcher             = var.health_check_matcher
+  }
+
+  dynamic "stickiness" {
+    for_each = var.stickiness == null ? [] : [var.stickiness]
+    content {
+      type            = "lb_cookie"
+      cookie_duration = stickiness.value.cookie_duration
+      enabled         = var.target_group_protocol == "TCP" ? false : stickiness.value.enabled
+    }
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  tags = merge(
+    module.default_target_group_label.tags,
+    var.target_group_additional_tags
+  )
+}
+
+resource "aws_lb_target_group" "wss" {
+  count = var.wss_enabled ? 1 : 0
+
+  name                 = var.target_group_name == "" ? module.default_target_group_label.id : var.target_group_name
+  port                 = var.target_group_port
+  protocol             = "TLS"
   vpc_id               = var.vpc_id
   target_type          = var.target_group_target_type
   deregistration_delay = var.deregistration_delay
