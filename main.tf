@@ -52,7 +52,7 @@ resource "aws_security_group_rule" "wss_ingress" {
   type              = "ingress"
   from_port         = var.http_port
   to_port           = var.http_port
-  protocol          = "tls"
+  protocol          = "tcp"
   cidr_blocks       = var.http_ingress_cidr_blocks
   prefix_list_ids   = var.http_ingress_prefix_list_ids
   security_group_id = aws_security_group.default.id
@@ -167,7 +167,7 @@ resource "aws_lb_target_group" "wss" {
     timeout             = var.health_check_timeout
     healthy_threshold   = var.health_check_healthy_threshold
     unhealthy_threshold = var.health_check_unhealthy_threshold
-    interval            = var.health_check_interval
+    interval            = 30
     matcher             = var.health_check_matcher
   }
 
