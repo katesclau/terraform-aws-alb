@@ -151,13 +151,7 @@ resource "aws_lb_target_group" "wss" {
   deregistration_delay = var.deregistration_delay
 
   health_check {
-    protocol            = var.target_group_protocol
     path                = var.health_check_path
-    timeout             = var.health_check_timeout
-    healthy_threshold   = var.health_check_healthy_threshold
-    unhealthy_threshold = var.health_check_unhealthy_threshold
-    interval            = 30
-    matcher             = var.health_check_matcher
   }
 
   dynamic "stickiness" {
